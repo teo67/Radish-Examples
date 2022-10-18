@@ -1,0 +1,15 @@
+dig pallette plant new Drawing.Pallette(1)
+pallette.set(0, new Drawing.RGB(255, 255, 255))
+pallette.set(1, new Drawing.RGB(0, 0, 0))
+
+holler("What would you like printed?")
+dig input plant holler.read()
+
+dig fontSize plant 16
+dig spacing plant 20
+spacing * (input.length - 1) + fontSize => width
+fontSize * 3 => height
+
+dig drawing plant new Drawing(width, height, pallette)
+drawing.string(input, 0, 2 * fontSize - 1, fontSize, 1, 1, -1, spacing)
+drawing.render("./y_printed.bmp")

@@ -1,0 +1,91 @@
+[0, 0, 0, 0, 0, 0, 0, 0, 0] => board
+
+dig checkWin plant tool() {
+    for 0 => i, i < 3, i++ {
+        if board[3 * i] = board[3 * i + 1] and board[3 * i + 1] = board[3 * i + 2] and board[3 * i] != 0 {
+            harvest board[3 * i]
+        }
+        if board[i] = board[i + 3] and board[i + 3] = board[i + 6] and board[i] != 0 {
+            harvest board[i]
+        }
+    }
+    if board[0] = board[4] and board[4] = board[8] and board[0] != 0 {
+        harvest board[0]
+    }
+    if board[2] = board[4] and board[4] = board[6] and board[2] != 0 {
+        harvest board[2]
+    }
+    harvest 0
+}
+
+dig getValidNumber plant tool() {
+    try {
+        harvest 0 + holler.read()
+    } catch {
+        holler("Please enter a valid number!")
+        harvest getValidNumber()
+    }
+}
+
+dig getValidInt plant tool() {
+    getValidNumber() => res
+    if res % 1 = 0 {
+        harvest res
+    }
+    holler("Please enter an integer!")
+    harvest getValidInt()
+}
+
+dig getIntInRange plant tool(a, b) {
+    getValidInt() => res
+    if a <= res and b >= res {
+        harvest res
+    }
+    holler("Please enter an integer between 'a' and 'b' (inclusive)!")
+    harvest getIntInRange(a, b)
+}
+
+dig getValidPosition plant tool(name) {
+    holler.write("'name', choose a row [0-2]: ")
+    getIntInRange(0, 2) => row
+    holler.write("'name', choose a column [0-2]: ")
+    getIntInRange(0, 2) => col
+    if board[row * 3 + col] = 0 {
+        harvest row * 3 + col
+    }
+    holler("That spot is already taken!")
+    harvest getValidPosition(name)
+}
+
+dig getBoard plant tool() {
+    dig returning plant ""
+    for 0 => i, i < 9, i++ {
+        returning += (board[i] = -1 ? "X", board[i] = 1 ? "O", "_") + " "
+        if i % 3 = 2 {
+            returning += "\n"
+        }
+    }
+    harvest returning
+}
+
+holler.write("Player 1, enter your name! ")
+holler.read() => p1name
+holler.write("Player 2, enter your name! ")
+holler.read() => p2name
+dig winner plant 0
+
+while winner = 0 and board.has(0) {
+    holler("Boardstate: \n'getBoard()'")
+    dig p1pos plant getValidPosition(p1name)
+    board[p1pos] plant -1
+    checkWin() => winner
+    if winner != 0 or !board.has(0) {
+        cancel
+    }
+    holler("Boardstate: \n'getBoard()'")
+    dig p2pos plant getValidPosition(p2name)
+    board[p2pos] plant 1
+    checkWin() => winner
+}
+holler("Final Board: \n'getBoard()'")
+holler("'winner = -1 ? p1name, winner = 1 ? p2name, "Nobody"' wins!")
